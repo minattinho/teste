@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disparar Webhook</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+    <h1 class="text-2xl font-bold text-blue-700 mb-6 text-center">Ativador de Webhook</h1>
+
+    <label for="url" class="block text-blue-600 font-medium mb-2">Cole a URL:</label>
+    <input type="text" id="url" class="w-full p-3 border border-blue-300 rounded-lg mb-4" placeholder="https://sua-url.com" />
+
+    <button onclick="enviar()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition">
+      Enviar para o Webhook
+    </button>
+
+    <p id="status" class="mt-4 text-center text-sm text-gray-600"></p>
+  </div>
+
+  <script>
+    async function enviar() {
+      const url = document.getElementById("url").value;
+      const status = document.getElementById("status");
+
+      if (!url) {
+        status.textContent = "Por favor, insira uma URL.";
+        return;
+      }
+
+      try {
+        const webhook = "https://SEU_WEBHOOK_AQUI"; // substitua pelo seu webhook
+
+        const response = await fetch(webhook, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ url })
+        });
+
+        if (response.ok) {
+          status.textContent = "Webhook disparado com sucesso!";
+        } else {
+          status.textContent = "Erro ao disparar o webhook.";
+        }
+      } catch (error) {
+        status.textContent = "Erro: " + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
