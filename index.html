@@ -1,54 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Disparar Webhook</title>
+  <meta charset="UTF-8">
+  <title>WebChat com IA</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-blue-100 flex items-center justify-center min-h-screen">
-  <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-    <h1 class="text-2xl font-bold text-blue-700 mb-6 text-center">Ativador de Webhook</h1>
-
-    <label for="url" class="block text-blue-600 font-medium mb-2">Cole a URL:</label>
-    <input type="text" id="url" class="w-full p-3 border border-blue-300 rounded-lg mb-4" placeholder="https://sua-url.com" />
-
-    <button onclick="enviar()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition">
-      Enviar para o Webhook
-    </button>
-
-    <p id="status" class="mt-4 text-center text-sm text-gray-600"></p>
+<body class="bg-blue-100 p-4 min-h-screen flex items-center justify-center">
+  <div class="bg-white w-full max-w-xl p-6 rounded-xl shadow">
+    <h1 class="text-xl font-bold mb-4 text-blue-700">Assistente com Contexto</h1>
+    <div id="mensagens" class="h-64 overflow-y-auto border p-4 rounded mb-4 bg-gray-50"></div>
+    <input id="entrada" type="text" placeholder="Digite sua pergunta..." class="w-full border p-3 rounded mb-4" />
+    <button onclick="enviar()" class="bg-blue-600 text-white w-full py-2 rounded hover:bg-blue-700">Enviar</button>
   </div>
 
   <script>
+    const contexto = new URLSearchParams(window.location.search).get("contextId") || "default";
+    const mensagens = document.getElementById("mensagens");
+
     async function enviar() {
-      const url = document.getElementById("url").value;
-      const status = document.getElementById("status");
+      const entrada = document.getElementById("entrada").value;
+      if (!entrada) return;
 
-      if (!url) {
-        status.textContent = "Por favor, insira uma URL.";
-        return;
-      }
+      mensagens.innerHTML += `<p class="text-right text-blue-700"><strong>Você:</strong> ${entrada}</p>`;
 
-      try {
-        const webhook = "https://integrations-crm.absolutatecnologia.com.br/webhook/4befb399-7d73-441b-aab0-cf27547c8ad8"; // substitua pelo seu webhook
+      const resposta = await fetch("https://SEU_N8N_URL/webhook/conversar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pergunta: entrada, contextId: contexto })
+      });
 
-        const response = await fetch(webhook, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ url })
-        });
+      const json = await resposta.json();
 
-        if (response.ok) {
-          status.textContent = "Webhook disparado com sucesso!";
-        } else {
-          status.textContent = "Erro ao disparar o webhook.";
-        }
-      } catch (error) {
-        status.textContent = "Erro: " + error.message;
-      }
+      mensagens.innerHTML += `<p class="text-left text-gray-800"><strong>IA:</strong> ${json.resposta}</p>`;
+      document.getElementById("entrada").value = "";
     }
   </script>
 </body>
